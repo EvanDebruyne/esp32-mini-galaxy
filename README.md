@@ -7,21 +7,17 @@ screen gets pulled into one black hole that spans both displays.
 
 <p align="center"><img src="docs/merge.gif" width="560" alt="Two Earths stretch toward each other and fall into a shared black hole"></p>
 
-<p align="center">
-  <img src="docs/case-photo.png" height="340" alt="A board in its printed case, showing the near-stars stage of the zoom">
-  &nbsp;&nbsp;
-  <img src="docs/photo-merge.jpg" height="340" alt="Two boards held close, each showing half of the black hole">
-</p>
-
 The boards measure each other's distance using radio signal strength (ESP-NOW broadcast
 packets, ~40/sec). No router, no Wi-Fi network, no internet, no extra libraries. Everything
 is drawn procedurally on the ESP32 at 30 to 40 frames per second.
 
 <p align="center">
-  <img src="docs/earth.gif" width="256" alt="The chunky-pixel Earth turning">
-  &nbsp;&nbsp;
-  <img src="docs/zoom.gif" width="560" alt="The zoom-out from Earth to the Milky Way">
+  <img src="docs/case-photo.png" height="384" alt="A board in its printed case, showing the near-stars stage of the zoom">
+  &nbsp;&nbsp;&nbsp;
+  <img src="docs/earth.gif" width="384" alt="The chunky-pixel Earth turning">
 </p>
+
+<p align="center"><img src="docs/zoom.gif" width="840" alt="The zoom-out from Earth to the Milky Way, both screens"></p>
 
 ## Which sketch?
 
@@ -97,6 +93,8 @@ Other knobs at the top of `ProximitySpheres_SharedHole.ino`:
 | `TX_POWER` | radio power; lower = more RSSI change per centimetre at desk distances |
 
 ## The zoom sketch
+
+<p align="center"><img src="docs/zoom-stages.png" alt="Stages of the zoom: Earth, Moon, inner planets, solar system, nearest stars, Milky Way"></p>
 
 `ProximitySpheres_Zoom` runs a "powers of ten" cycle on both boards in sync. The Earth holds for ten
 seconds, then the view zooms out at a steady rate (about 34 seconds per tenfold step): the camera hands
@@ -178,11 +176,11 @@ whole zoom cycle) from the same simulators.
 - `PanelTest/`: screen identification test (run it if the screen is black)
 - `*/tqt_display.h`: minimal display driver for the T-QT Pro screen (pins and init from LilyGO's repo), identical copy in each sketch folder
 - `sim/`: PC simulators of the sketches, the Earth map generator and the demo-animation script (Python); `sim/data/` holds the Natural Earth map data
-- `docs/`: demo animations and stills rendered from the simulators, plus the edited photos
+- `docs/`: demo animations and stills rendered from the simulators, plus the case photo
 - `reference/`: preview strips rendered by the simulators
 - `case/`: printable case (OpenSCAD source, STL and 3MF)
 - `extras/`: earlier looks, with their previews and simulators
-- `photos/`: the original photos of the boards running
+- `photos/`: the original case photo
 
 ## License
 
