@@ -83,7 +83,7 @@ const uint8_t ESPNOW_CHANNEL = 1;
 // Sphere look
 const float SPHERE_RADIUS = 55.0f;   // pixels (screen is 128 wide)
 const int   RINGS         = 36;      // latitude rows of dots (36 rings = ~1650 dots)
-const int   NUM_STARS     = 70;
+const int   NUM_STARS     = 90;
 
 // Earth look
 const float SPIN_PERIOD_S  = 60.0f;  // seconds per Earth turn (must divide 3600)
@@ -133,7 +133,7 @@ static inline void queueFront(int x, int y, int size, uint16_t c) {
 static Dot dots[MAX_DOTS];
 static int numDots = 0;
 
-struct Star { float x, y, b; };
+struct Star { float b; };
 static Star stars[NUM_STARS];
 
 static uint8_t  glowMap[W * H];      // precomputed soft glow behind the black hole (this board's half)
@@ -249,6 +249,24 @@ static void fillCircle(float cx, float cy, float rad, uint16_t c) {
 static float hash01(uint32_t n) {                      // cheap repeatable pseudo-random 0..1
   n = (n ^ 61) ^ (n >> 16); n *= 9; n ^= n >> 4; n *= 0x27d4eb2d; n ^= n >> 15;
   return (n & 0xFFFFFF) / 16777216.0f;
+}
+
+// Background stars drift to give the backdrop depth. Each star lives one cycle of the travel
+// parameter s: it appears somewhere, slides toward the centre while s rises (or away from it
+// while s falls), fades and reappears elsewhere. Nearer stars (bigger k) travel further per
+// cycle. nWrap > 0 repeats the pattern every nWrap cycles. Returns the fade envelope.
+static float starPos(int i, float s, int nWrap, float &x, float &y) {
+  float u = s + hash01(i * 3 + 505);
+  int   n = (int)floorf(u);
+  float f = u - n;
+  if (nWrap > 0) n = ((n % nWrap) + nWrap) % nWrap;
+  uint32_t seed = (uint32_t)(i * 7919 + n * 104729);
+  float k   = 0.35f + 0.65f * hash01(i * 3 + 404);
+  float ang = hash01(seed + 1) * TWO_PI;
+  float r   = (6.0f + 90.0f * sqrtf(hash01(seed + 2))) * expf(-k * f);
+  x = W * 0.5f + r * cosf(ang);
+  y = H * 0.5f + r * sinf(ang);
+  return smoothstepf(0.0f, 0.2f, f) * (1.0f - smoothstepf(0.8f, 1.0f, f));
 }
 
 
@@ -377,8 +395,6 @@ static void buildScene() {
     }
   }
   for (int i = 0; i < NUM_STARS; i++) {
-    stars[i].x = hash01(i * 3 + 101) * W;
-    stars[i].y = hash01(i * 3 + 202) * H;
     stars[i].b = 0.15f + 0.45f * hash01(i * 3 + 303);
   }
 }
@@ -459,13 +475,15 @@ static void renderScene(float t, float tShared, float dt) {
   // chunky pixels while it's a globe; smaller once the merge starts (the merge is the heavy part)
   const int dotSize = m > 0.0f ? 3 : (reachAmt < 0.5f ? 5 : 4);
 
-  // --- stars, pushed outward around the hole (gravitational lensing) ---
+  // --- stars: a slow drift outward (flying forward), pushed outward around the hole ---
   for (int i = 0; i < NUM_STARS; i++) {
-    float dx = stars[i].x - hcx, dy = stars[i].y - hcy;
+    float sx0, sy0;
+    float senv = starPos(i, -tShared / 60.0f, 60, sx0, sy0);   // the clock wraps hourly: 60 cycles
+    float dx = sx0 - hcx, dy = sy0 - hcy;
     float d2 = dx * dx + dy * dy + 1.0f;
     float push = 1.0f + m * (hR * hR * 1.6f) / d2;
     float twinkle = 0.75f + 0.25f * sinf(t * 2.0f + i);
-    float v = stars[i].b * twinkle * (0.5f + 0.3f * m);
+    float v = stars[i].b * senv * twinkle * (0.5f + 0.3f * m);
     float sx = hcx + dx * push, sy = hcy + dy * push;
     float rx = sx - hcx, ry = sy - hcy;
     if (m > 0.01f && rx * rx + ry * ry < hR * hR * 1.3f) continue;   // swallowed

@@ -20,7 +20,7 @@ MERGE_START = (MERGE_START_DBM - RSSI_FAR) / (RSSI_NEAR - RSSI_FAR)
 MERGE_FULL = (MERGE_FULL_DBM - RSSI_FAR) / (RSSI_NEAR - RSSI_FAR)
 GAP_PX, HOLE_RADIUS, DISK_TILT = 24.0, 44.0, 0.10
 DISK_INNER, DISK_OUTER = 1.20, 3.40           # disk radii in horizon radii
-SPHERE_RADIUS, RINGS, NUM_STARS = 55.0, 36, 70
+SPHERE_RADIUS, RINGS, NUM_STARS = 55.0, 36, 90
 MAX_DOTS = 1700
 STREAM_DIP = 0.22                              # how far the stream dives toward the hole mid-way
 REACH_AMP  = 0.60                              # how far the lobe stretches toward the other sphere
@@ -72,7 +72,7 @@ def build_scene():
             d.jitter = (0.025 if sl >= 0 else -0.025) + (hash01(n * 2 + 7) - 0.5) * 0.05
             dots.append(d)
     for i in range(NUM_STARS):
-        stars.append((hash01(i * 3 + 101) * W, hash01(i * 3 + 202) * H, 0.15 + 0.45 * hash01(i * 3 + 303)))
+        stars.append(0.15 + 0.45 * hash01(i * 3 + 303))
     return dots, stars
 
 
@@ -104,7 +104,7 @@ def build_glow(side):
     return np.clip(g, 0, 1)
 
 
-def render(fb, dots, stars, glow, P, sgn, t, tShared, spinExtra=0.0):
+def render(fb, dots, stars, glow, P, sgn, t, tShared, spinExtra=0.0, starWrap=60):
     """sgn = +1 if this board is the LEFT one (peer on its right), -1 if it is the right one."""
     m = clampf((P - MERGE_START) / (MERGE_FULL - MERGE_START), 0.0, 1.0)
     reachAmt = clampf(P / MERGE_START, 0.0, 1.0) * (1.0 - m)
@@ -132,12 +132,13 @@ def render(fb, dots, stars, glow, P, sgn, t, tShared, spinExtra=0.0):
     dot_size = 3 if m > 0.0 else (5 if reachAmt < 0.5 else 4)
 
     # --- stars ---
-    for i, (sx0, sy0, b) in enumerate(stars):
+    for i, b in enumerate(stars):
+        sx0, sy0, senv = star_pos(i, -tShared / 60.0, starWrap)   # the sketch wraps at 60 (hourly clock)
         dx, dy = sx0 - hcx, sy0 - hcy
         d2 = dx * dx + dy * dy + 1.0
         push = 1.0 + m * (hR * hR * 1.6) / d2
         tw = 0.75 + 0.25 * math.sin(t * 2.0 + i)
-        v = b * tw * (0.5 + 0.3 * m)
+        v = b * senv * tw * (0.5 + 0.3 * m)
         sx, sy = hcx + dx * push, hcy + dy * push
         rx, ry = sx - hcx, sy - hcy
         if m > 0.01 and rx * rx + ry * ry < hR * hR * 1.3:

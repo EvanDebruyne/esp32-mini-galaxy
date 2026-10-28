@@ -105,7 +105,7 @@ const float AXIAL_TILT = 0.42f;      // Earth's lean on screen, north pole towar
 
 // Earth dot globe (used while the Earth is bigger than ~20 px; smaller Earths are drawn solid)
 const int   RINGS     = 36;          // latitude rows of dots (36 rings = ~1650 dots)
-const int   NUM_STARS = 70;          // faint far-background stars that twinkle
+const int   NUM_STARS = 90;          // faint far-background stars that twinkle and drift
 
 // Simple palette: two blues for the sea, three greens for the land.
 static const float SEA_DEEP[3]    = {0.03f, 0.10f, 0.38f};
@@ -157,7 +157,7 @@ const int MAX_DOTS = 1700;
 static Dot dots[MAX_DOTS];
 static int numDots = 0;
 
-struct Star { float x, y, b; };
+struct Star { float b; };
 static Star stars[NUM_STARS];
 
 // ---------- particles: everything drawn in a frame ----------
@@ -306,6 +306,24 @@ static void fillCircle(float cx, float cy, float rad, uint16_t c) {
 static float hash01(uint32_t n) {                      // cheap repeatable pseudo-random 0..1
   n = (n ^ 61) ^ (n >> 16); n *= 9; n ^= n >> 4; n *= 0x27d4eb2d; n ^= n >> 15;
   return (n & 0xFFFFFF) / 16777216.0f;
+}
+
+// Background stars drift to give the backdrop depth. Each star lives one cycle of the travel
+// parameter s: it appears somewhere, slides toward the centre while s rises (or away from it
+// while s falls), fades and reappears elsewhere. Nearer stars (bigger k) travel further per
+// cycle. nWrap > 0 repeats the pattern every nWrap cycles. Returns the fade envelope.
+static float starPos(int i, float s, int nWrap, float &x, float &y) {
+  float u = s + hash01(i * 3 + 505);
+  int   n = (int)floorf(u);
+  float f = u - n;
+  if (nWrap > 0) n = ((n % nWrap) + nWrap) % nWrap;
+  uint32_t seed = (uint32_t)(i * 7919 + n * 104729);
+  float k   = 0.35f + 0.65f * hash01(i * 3 + 404);
+  float ang = hash01(seed + 1) * TWO_PI;
+  float r   = (6.0f + 90.0f * sqrtf(hash01(seed + 2))) * expf(-k * f);
+  x = W * 0.5f + r * cosf(ang);
+  y = H * 0.5f + r * sinf(ang);
+  return smoothstepf(0.0f, 0.2f, f) * (1.0f - smoothstepf(0.8f, 1.0f, f));
 }
 
 // 3x5 pixel font: digits, then - L R . A K M U Y
@@ -468,8 +486,6 @@ static void buildScene() {
     }
   }
   for (int i = 0; i < NUM_STARS; i++) {
-    stars[i].x = hash01(i * 3 + 101) * W;
-    stars[i].y = hash01(i * 3 + 202) * H;
     stars[i].b = 0.15f + 0.45f * hash01(i * 3 + 303);
   }
   // the Milky Way: a yellow bulge, two bluish arms and scattered disc stars (in light-years)
@@ -846,13 +862,15 @@ static void renderScene(float t, float tShared, float dt) {
   const float hR  = HOLE_RADIUS * smoothstepf(0.0f, 1.0f, m);
   const float Rh  = HOLE_RADIUS;
 
-  // --- far background stars, pushed outward around the hole (gravitational lensing) ---
+  // --- far background stars: drifting inward with the zoom, pushed outward around the hole ---
   for (int i = 0; i < NUM_STARS; i++) {
-    float dx = stars[i].x - hcx, dy = stars[i].y - hcy;
+    float sx0, sy0;
+    float senv = starPos(i, z.logW, 0, sx0, sy0);
+    float dx = sx0 - hcx, dy = sy0 - hcy;
     float d2 = dx * dx + dy * dy + 1.0f;
     float push = 1.0f + m * (hR * hR * 1.6f) / d2;
     float twinkle = 0.75f + 0.25f * sinf(t * 2.0f + i);
-    float v = stars[i].b * twinkle * (0.5f + 0.3f * m) * (0.4f + 0.6f * z.env);
+    float v = stars[i].b * senv * twinkle * (0.5f + 0.3f * m) * (0.4f + 0.6f * z.env);
     float sx = hcx + dx * push, sy = hcy + dy * push;
     float rx = sx - hcx, ry = sy - hcy;
     if (m > 0.01f && rx * rx + ry * ry < hR * hR * 1.3f) continue;   // swallowed

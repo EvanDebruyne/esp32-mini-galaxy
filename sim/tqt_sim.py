@@ -27,6 +27,21 @@ def roundf(x):
     return math.floor(x + 0.5) if x >= 0 else -math.floor(-x + 0.5)
 
 
+def star_pos(i, s, n_wrap=0):
+    """1:1 port of starPos(): drifting background star i at travel parameter s -> (x, y, envelope)."""
+    u = s + hash01(i * 3 + 505)
+    n = math.floor(u)
+    f = u - n
+    if n_wrap > 0:
+        n = ((n % n_wrap) + n_wrap) % n_wrap
+    seed = (i * 7919 + n * 104729) & 0xFFFFFFFF
+    k = 0.35 + 0.65 * hash01(i * 3 + 404)
+    ang = hash01(seed + 1) * TWO_PI
+    r = (6.0 + 90.0 * math.sqrt(hash01(seed + 2))) * math.exp(-k * f)
+    env = smoothstepf(0.0, 0.2, f) * (1.0 - smoothstepf(0.8, 1.0, f))
+    return W * 0.5 + r * math.cos(ang), H * 0.5 + r * math.sin(ang), env
+
+
 def hash01(n):
     n &= 0xFFFFFFFF
     n = ((n ^ 61) ^ (n >> 16)) & 0xFFFFFFFF

@@ -28,7 +28,7 @@ ZOOM_KEYS = [
 ]
 FADE_IN_END, FADE_OUT_BEG, FADE_OUT_END = 0.020, 0.955, 0.985
 VIEW_TILT, AXIAL_TILT = 0.50, 0.42
-RINGS, NUM_STARS = 36, 70
+RINGS, NUM_STARS = 36, 90
 MAX_DOTS, MAX_PART = 1700, 4000
 
 SEA_DEEP, SEA_SHALLOW = (0.03, 0.10, 0.38), (0.10, 0.34, 0.72)
@@ -137,7 +137,7 @@ def build_scene():
             d.a = int(lon / TWO_PI * 255.0)
             dots.append(d)
     for i in range(NUM_STARS):
-        stars.append((hash01(i * 3 + 101) * W, hash01(i * 3 + 202) * H, 0.15 + 0.45 * hash01(i * 3 + 303)))
+        stars.append(0.15 + 0.45 * hash01(i * 3 + 303))
     galaxy = []
     for i in range(N_GALAXY):
         h1, h2, h3, h4 = hash01(i * 7 + 11), hash01(i * 7 + 13), hash01(i * 7 + 17), hash01(i * 7 + 19)
@@ -438,12 +438,13 @@ def render(fb, em, stars, glow, P, sgn, t, tShared, phase):
     hR = HOLE_RADIUS * smoothstepf(0.0, 1.0, m)
     Rh = HOLE_RADIUS
 
-    for i, (sx0, sy0, b) in enumerate(stars):
+    for i, b in enumerate(stars):
+        sx0, sy0, senv = star_pos(i, z["logW"])
         dx, dy = sx0 - hcx, sy0 - hcy
         d2 = dx * dx + dy * dy + 1.0
         push = 1.0 + m * (hR * hR * 1.6) / d2
         tw = 0.75 + 0.25 * math.sin(t * 2.0 + i)
-        v = b * tw * (0.5 + 0.3 * m) * (0.4 + 0.6 * z["env"])
+        v = b * senv * tw * (0.5 + 0.3 * m) * (0.4 + 0.6 * z["env"])
         sx, sy = hcx + dx * push, hcy + dy * push
         rx, ry = sx - hcx, sy - hcy
         if m > 0.01 and rx * rx + ry * ry < hR * hR * 1.3:

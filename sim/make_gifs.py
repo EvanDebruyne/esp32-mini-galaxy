@@ -121,7 +121,7 @@ def earth_frames(n=72):
     for i in range(n):
         ts = sh.SPIN_PERIOD_S * i / n
         fb = FB()
-        sh.render(fb, dots, stars, glow, 0.0, 1.0, ts, ts, 0.0)
+        sh.render(fb, dots, stars, glow, 0.0, 1.0, ts, ts, 0.0, starWrap=1)   # stars loop with the turn
         img = fb.image()
         frames.append(img.resize((img.width * SCALE, img.height * SCALE), Image.NEAREST))
     return frames
