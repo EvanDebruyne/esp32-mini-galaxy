@@ -1,4 +1,4 @@
-// ProximitySpheres_Zoom — two LilyGO T-QT Pro boards.
+// MiniGalaxy_Zoom — two LilyGO T-QT Pro boards.
 //
 // A slow "powers of ten" ride: the view starts on a chunky-pixel Earth and keeps zooming
 // out. The Moon swings into view, then the Sun takes the centre and the planets circle it,
@@ -8,7 +8,7 @@
 // Both boards run the same cycle in sync (shared clock), each showing a different side of
 // the Earth. Bring the boards together at ANY point in the cycle and whatever is on screen
 // is torn apart and spirals into ONE black hole sitting in the gap between the screens,
-// exactly like ProximitySpheres_SharedHole. Everything drawn is a particle, so the merge
+// exactly like MiniGalaxy_Earth. Everything drawn is a particle, so the merge
 // works the same for Earth dots, planets, stars and galaxy dots.
 //
 // The zoom skips quickly through the empty stretches (the dark between Neptune and the
@@ -61,7 +61,7 @@ const float FORM_SECONDS    = 4.0f;
 const float MERGE_START = (MERGE_START_DBM - RSSI_FAR) / (RSSI_NEAR - RSSI_FAR);
 const float MERGE_FULL  = (MERGE_FULL_DBM  - RSSI_FAR) / (RSSI_NEAR - RSSI_FAR);
 
-// Shared black hole geometry (see ProximitySpheres_SharedHole).
+// Shared black hole geometry (see MiniGalaxy_Earth).
 const float GAP_PX      = 24.0f;
 const float HOLE_RADIUS = 44.0f;
 const float DISK_TILT   = 0.10f;
@@ -1098,7 +1098,7 @@ void setup() {
   buildScene();
   buildDayTable();
 
-  Serial.printf("\nProximitySpheres_Zoom  panel=V%d  dots=%d  cycle=%.0f min  mac=%02X:%02X:%02X:%02X:%02X:%02X\n",
+  Serial.printf("\nMiniGalaxy_Zoom  panel=V%d  dots=%d  cycle=%.0f min  mac=%02X:%02X:%02X:%02X:%02X:%02X\n",
                 PANEL_VERSION, numDots, ZOOM_MINUTES, myMac[0], myMac[1], myMac[2], myMac[3], myMac[4], myMac[5]);
 }
 

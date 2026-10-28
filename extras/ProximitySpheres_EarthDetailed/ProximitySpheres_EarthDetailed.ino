@@ -1,4 +1,4 @@
-// ProximitySpheres_SharedHole — two LilyGO T-QT Pro boards.
+// MiniGalaxy_Earth — two LilyGO T-QT Pro boards.
 //
 // Apart:           each board shows a slowly turning pixel Earth (sunlit, clouds, city
 //                  lights on the night side) floating among the stars.
@@ -843,7 +843,7 @@ void setup() {
   buildScene();
   buildEarth();
 
-  Serial.printf("\nProximitySpheres_SharedHole  panel=V%d  dots=%d  mac=%02X:%02X:%02X:%02X:%02X:%02X\n",
+  Serial.printf("\nProximitySpheres_EarthDetailed  panel=V%d  dots=%d  mac=%02X:%02X:%02X:%02X:%02X:%02X\n",
                 PANEL_VERSION, numDots, myMac[0], myMac[1], myMac[2], myMac[3], myMac[4], myMac[5]);
 }
 

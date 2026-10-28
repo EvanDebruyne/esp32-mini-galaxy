@@ -1,4 +1,4 @@
-"""Preview of ProximitySpheres_Zoom -- 1:1 port of its renderScene().
+"""Preview of MiniGalaxy_Zoom -- 1:1 port of its renderScene().
 
 Earth -> Moon -> solar system -> Oort cloud -> nearby stars -> Milky Way, in ZOOM_MINUTES,
 then fade and repeat. Bring the boards together at any point and whatever is on screen

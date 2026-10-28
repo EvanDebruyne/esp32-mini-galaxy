@@ -1,4 +1,4 @@
-"""Preview of the reworked ProximitySpheres_SharedHole — 1:1 port of its renderScene().
+"""Preview of the reworked MiniGalaxy_Earth — 1:1 port of its renderScene().
 
 Both boards draw ONE scene: a 280-px-wide virtual canvas (screen, bezel gap, screen) holding
 the left sphere, the right sphere and the shared black hole in the gap. Each board shows its

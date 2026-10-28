@@ -1,4 +1,4 @@
-"""Preview of ProximitySpheres_SharedHole (chunky Earth version) -- 1:1 port of its renderScene().
+"""Preview of MiniGalaxy_Earth (chunky Earth version) -- 1:1 port of its renderScene().
 
 Both boards draw ONE scene: a 280-px-wide virtual canvas (screen, bezel gap, screen) holding
 the left Earth, the right Earth and the shared black hole in the gap. Each board shows its
@@ -6,7 +6,7 @@ own 128-px window of it. At rest each board shows a chunky-pixel Earth (blue sea
 land); as the boards approach it stretches toward the other one, then every dot spirals
 into the black hole.
 
-    python sim/preview_sharedhole.py   -> reference/sharedhole-preview.png  (merge, by dBm)
+    python sim/preview_earth.py   -> reference/sharedhole-preview.png  (merge, by dBm)
                                           -> reference/earth-rest-preview.png     (resting Earths)
 The Earth texture comes from sim/earth_map.npz (python sim/make_earth_map.py).
 """

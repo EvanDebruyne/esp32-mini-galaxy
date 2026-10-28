@@ -5,7 +5,7 @@ scale, stored in sim/data/natural_earth/. The hand-drawn outlines below are only
 Greenland's ice sheet and as a fallback if that data is missing.
 
 Outputs
-  ProximitySpheres_SharedHole/earth_map.h   two 256x128 byte tables for the sketch
+  MiniGalaxy_Earth/earth_map.h   two 256x128 byte tables for the sketch
   sim/earth_map.npz                          the same tables for the Python preview
   reference/earth-map-flat.png               flat map, to eyeball the shapes
 
@@ -489,7 +489,7 @@ def flat_preview(landb, cloud, path):
 
 if __name__ == "__main__":
     landb, cloud = build()
-    write_header(landb, cloud, os.path.join(ROOT, "ProximitySpheres_SharedHole", "earth_map.h"))
+    write_header(landb, cloud, os.path.join(ROOT, "MiniGalaxy_Earth", "earth_map.h"))
     np.savez_compressed(os.path.join(HERE, "earth_map.npz"), land=landb, cloud=cloud,
                         palette=np.array(PALETTE, dtype=np.float32))
     flat_preview(landb, cloud, os.path.join(ROOT, "reference", "earth-map-flat.png"))

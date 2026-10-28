@@ -1,4 +1,4 @@
-// ProximitySpheres_SharedHole — two LilyGO T-QT Pro boards.
+// MiniGalaxy_Earth — two LilyGO T-QT Pro boards.
 //
 // Apart:           each board shows a big rotating rainbow dot-sphere.
 // Close:           the spheres stretch toward each other and their tips touch across the gap.

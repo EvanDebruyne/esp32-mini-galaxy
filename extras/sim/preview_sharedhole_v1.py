@@ -1,4 +1,4 @@
-"""Preview of ProximitySpheres_SharedHole (as written by Opus) — 1:1 port of renderScene().
+"""Preview of MiniGalaxy_Earth (as written by Opus) — 1:1 port of renderScene().
 
     python extras/sim/preview_sharedhole_v1.py            -> extras/previews/sharedhole-v1-preview.png
 """

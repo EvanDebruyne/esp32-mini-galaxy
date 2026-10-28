@@ -1,4 +1,4 @@
-// ProximitySpheres_SharedHole — two LilyGO T-QT Pro boards.
+// MiniGalaxy_Earth — two LilyGO T-QT Pro boards.
 //
 // Apart:           each board shows a slowly turning chunky-pixel Earth (blue oceans, green
 //                  land) floating among the stars.
@@ -18,7 +18,7 @@
 // halves of the scene animate in sync.
 //
 // Flash the SAME sketch to both boards. See README.md for Arduino IDE settings.
-// To preview the animation on the PC without flashing: python sim/preview_sharedhole.py
+// To preview the animation on the PC without flashing: python sim/preview_earth.py
 //
 // Buttons:
 //   KEY  (right button, IO47) : swap which board is "left" (flips BOTH boards)
@@ -694,7 +694,7 @@ void setup() {
   radioBegin();
   buildScene();
 
-  Serial.printf("\nProximitySpheres_SharedHole  panel=V%d  dots=%d  mac=%02X:%02X:%02X:%02X:%02X:%02X\n",
+  Serial.printf("\nMiniGalaxy_Earth  panel=V%d  dots=%d  mac=%02X:%02X:%02X:%02X:%02X:%02X\n",
                 PANEL_VERSION, numDots, myMac[0], myMac[1], myMac[2], myMac[3], myMac[4], myMac[5]);
 }
 
