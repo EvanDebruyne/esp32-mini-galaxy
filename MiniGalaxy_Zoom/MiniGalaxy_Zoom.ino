@@ -489,15 +489,15 @@ static void buildScene() {
     galaxy[i].y = (int16_t)(r * sinf(th) / 100.0f);
     galaxy[i].type = type;
   }
-  // the nearest stars: mostly faint red dwarfs, a few bright white and blue ones
+  // the nearest stars as the eye sees them: mostly white, some blue-white, a few dim red dwarfs
   for (int i = 0; i < N_NEAR; i++) {
     float h1 = hash01(i * 5 + 23), h2 = hash01(i * 5 + 29), h3 = hash01(i * 5 + 31);
     float r = 150.0f * sqrtf(h1), th = h2 * TWO_PI;
     nearStars[i].x = (int16_t)(r * cosf(th) * 2.0f);
     nearStars[i].y = (int16_t)(r * sinf(th) * 2.0f);
-    if (h3 < 0.80f)      { nearStars[i].type = 0; nearStars[i].bright = (uint8_t)(70 + 60 * hash01(i * 5 + 37)); }
-    else if (h3 < 0.95f) { nearStars[i].type = 1; nearStars[i].bright = (uint8_t)(140 + 60 * hash01(i * 5 + 37)); }
-    else                 { nearStars[i].type = 2; nearStars[i].bright = 255; }
+    if (h3 < 0.30f)      { nearStars[i].type = 0; nearStars[i].bright = (uint8_t)(60 + 50 * hash01(i * 5 + 37)); }
+    else if (h3 < 0.85f) { nearStars[i].type = 1; nearStars[i].bright = (uint8_t)(120 + 100 * hash01(i * 5 + 37)); }
+    else                 { nearStars[i].type = 2; nearStars[i].bright = (uint8_t)(200 + 55 * hash01(i * 5 + 37)); }
   }
 }
 
@@ -712,7 +712,7 @@ static void emitScene(const ZoomState &z, float ox, float oy, float sphere, floa
       float sx = scrX(sunRelX + s.x * (0.5f * LY)), sy = scrY(sunRelY + s.y * (0.5f * LY));
       if (fabsf(sx - sunSx) < 1.5f && fabsf(sy - sunSy) < 1.5f) continue;   // inside the Sun's pixel
       float b = s.bright / 255.0f * nearA * env;
-      if (s.type == 0)      emitPixel(sx, sy, b, b * 0.62f, b * 0.45f, 200000 + i, other);
+      if (s.type == 0)      emitPixel(sx, sy, b, b * 0.38f, b * 0.25f, 200000 + i, other);   // red dwarf
       else if (s.type == 1) emitPixel(sx, sy, b, b * 0.97f, b * 0.90f, 200000 + i, other);
       else                  emitPixel(sx, sy, b * 0.80f, b * 0.86f, b, 200000 + i, other);
     }

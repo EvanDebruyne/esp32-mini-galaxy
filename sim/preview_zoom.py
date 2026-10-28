@@ -157,9 +157,9 @@ def build_scene():
         h1, h2, h3 = hash01(i * 5 + 23), hash01(i * 5 + 29), hash01(i * 5 + 31)
         r, th = 150.0 * math.sqrt(h1), h2 * TWO_PI
         x, y = int(r * math.cos(th) * 2.0), int(r * math.sin(th) * 2.0)
-        if h3 < 0.80:   typ, br = 0, int(70 + 60 * hash01(i * 5 + 37))
-        elif h3 < 0.95: typ, br = 1, int(140 + 60 * hash01(i * 5 + 37))
-        else:           typ, br = 2, 255
+        if h3 < 0.30:   typ, br = 0, int(60 + 50 * hash01(i * 5 + 37))
+        elif h3 < 0.85: typ, br = 1, int(120 + 100 * hash01(i * 5 + 37))
+        else:           typ, br = 2, int(200 + 55 * hash01(i * 5 + 37))
         near.append((x, y, br, typ))
     return dots, stars, galaxy, near
 
@@ -341,7 +341,7 @@ class Emitter:
                 if abs(sx - sunSx) < 1.5 and abs(sy - sunSy) < 1.5:
                     continue
                 b = br / 255.0 * nearA * env
-                if typ == 0:   self.pixel(sx, sy, b, b * 0.62, b * 0.45, 200000 + i, other)
+                if typ == 0:   self.pixel(sx, sy, b, b * 0.38, b * 0.25, 200000 + i, other)
                 elif typ == 1: self.pixel(sx, sy, b, b * 0.97, b * 0.90, 200000 + i, other)
                 else:          self.pixel(sx, sy, b * 0.80, b * 0.86, b, 200000 + i, other)
         oortA = 0.45 * smoothstepf(13.3, 14.3, logW) * (1.0 - smoothstepf(16.8, 17.8, logW))
