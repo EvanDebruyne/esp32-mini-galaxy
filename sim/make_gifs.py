@@ -5,7 +5,7 @@
   docs/merge.gif        both boards: Earths reach for each other, tear apart, become the black hole, then let go
   docs/earth.gif        one board: the pixel Earth doing a full turn (seamless loop)
   docs/debug.gif        the same, with the BOOT-button debug overlay on
-  docs/zoom.gif         one board: the whole 7.5-minute zoom-out cycle in about 24 s
+  docs/zoom.gif         one board: the whole 7.5-minute zoom-out cycle in about 30 s
   docs/zoom-stages.png  twelve moments of the zoom, one strip
   docs/hero.png         the merge mid-way, as a still
 
@@ -128,7 +128,7 @@ def earth_frames(n=72):
 
 
 # ------------------------------------------------------------------ the zoom
-def zoom_frames(seconds=24, fps=15):
+def zoom_frames(seconds=30, fps=15):
     dots, stars, galaxy, near = zm.build_scene()
     em = zm.Emitter(dots, galaxy, near)
     glowL, glowR = zm.build_glow(1.0), zm.build_glow(-1.0)

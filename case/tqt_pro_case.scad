@@ -13,12 +13,20 @@
 //  Anything tagged "CHECK" below was inferred rather than read directly
 //  from those files - verify with calipers before printing.
 //
+//  V4 (2026-10-27): the BOOT and KEY switches are pressed from the TOP (round plunger
+//  on top of a 2.75 x 4 x 2.5 mm switch). Like LilyGO's own case, the buttons are a
+//  separate third part ("keys"): two caps joined by a thin bar. It is dropped into the
+//  lid from the inside, each cap pokes up through a square hole in the lid top, a
+//  flange under the lid keeps it in, and a stem under each flange reaches the plunger.
+//  Three parts: base, lid, keys.  button_style = "top" gives the V3 flexing paddles,
+//  "side" the (wrong) V2 side flaps, "notch" the V1 side notches.
+//
 //  Printing:  part = "both_for_print"  ->  base upright, lid face-down.
 //  Previews:  part = "assembly" / "exploded" show the case with a board mock-up.
 // =====================================================================
 
 /* [Part to render] */
-part = "assembly"; // [base, lid, both_for_print, assembly, exploded, board]
+part = "assembly"; // [base, lid, keys, both_for_print, assembly, exploded, board]
 
 /* [Print / fit settings] */
 wall      = 1.6;   // side wall thickness
@@ -50,8 +58,43 @@ usb_cut_above = 0.6;  // extra height above the receptacle top
 usb_cut_below = 0.5;  // notch depth into the base rim below the receptacle
 btn_cut_margin = 0.35; // extra length each side of the button body
 btn_cut_above  = 0.40; // extra height above the button body
-reset_slot_w    = 2.6;  // width of the RESET pin-hole / slot
-reset_slot_open = true; // true: slot open to the base rim (no bridging). false: closed hole (2.6 mm bridge)
+/* [Buttons] */
+button_style = "keycap"; // [keycap, top, side, notch]
+plunger_top_z = 3.5;   // top of the switch plunger above the PCB underside  (CHECK: 2.5 mm switch on a 1.0 mm PCB)
+stem_gap      = 0.15;  // rest gap between stem and plunger  (CHECK: raise if a button is held down)
+// --- V4 separate keycap bridge (third printed part) ---
+key_cap_w     = 4.0;   // square cap size (LilyGO's are ~4 mm)
+key_hole_w    = 4.4;   // square hole in the lid top (0.2 mm clearance per side)
+key_cap_above = 0.8;   // how far the cap stands above the lid top
+key_flange_t  = 1.0;   // flange thickness under the lid top
+key_flange_out = 0.35; // flange overlap beyond the hole, toward the PCB edge (limited by the cavity wall)
+key_flange_in  = 1.0;  // flange overlap toward the board centre
+key_flange_y   = 0.6;  // flange overlap along the board
+key_stem_w    = 2.2;   // stem under the flange, pressing the plunger
+key_bar_w     = 2.0;   // bar joining the two caps
+// --- V3 top paddles (only for button_style = "top") ---
+stem_w        = 2.4;   // stem cross-section (plunger is ~1.8 round)
+top_flap_t    = 0.8;   // paddle thickness (lid top is thinned from the inside)
+top_flap_w    = 5.5;   // paddle width along the board (switch body is 4.0)
+top_hinge_x   = 8.0;   // paddle hinge line, measured from the BOOT-side PCB edge (mirrored for KEY)
+top_slit_w    = 0.5;   // slit width around the paddle
+top_cap_d     = 3.4;   // round cap on the outside
+top_cap_h     = 0.6;   // cap height above the lid
+// --- V2 side flaps (only for button_style = "side") ---
+flex_buttons = (button_style == "side");
+flap_t    = 0.8;   // flap / hinge thickness (wall is thinned from the inside)
+flap_w    = 5.0;   // flap width along the board
+slit_w    = 0.5;   // slit width around the flap
+flap_gap  = 0.3;   // gap between the flap's free bottom edge and the base rim
+nub_w     = 2.0;   // inner nub width (plunger is ~2.4 wide)
+nub_gap   = 0.10;  // rest gap between nub tip and plunger tip  (CHECK: raise if a button is held down)
+cap_w     = 3.0;   // outer button cap width
+cap_h     = 0.8;   // outer button cap height above the wall
+
+/* [Openings] */
+reset_hole_d    = 2.4;  // round RESET pin hole, like LilyGO's keyhole
+reset_slot_w    = 1.2;  // narrow slit from the hole up to the base rim (keeps it bridge-free)
+reset_slot_open = true; // false: round hole only (needs a 2.4 mm bridge)
 jst_cutout = false;     // open the end wall for the JST-SH (STEMMA QT) socket too
 header_h   = 0;         // 0 = no pin headers. ~8.5 if headers are soldered pointing down  (CHECK)
 
@@ -102,6 +145,11 @@ usb_cut_top = pcb_t + usb_h + usb_cut_above;
 usb_cut_bot = pcb_t - usb_cut_below;
 btn_cut_top = pcb_t + btn_h + btn_cut_above;
 rst_cy = (rst_y0 + rst_y1) / 2;
+btn_cy = (btn_y0 + btn_y1) / 2;                    // plunger centre along the board (4.25)
+btn_cz = pcb_t + btn_h / 2;                        // plunger centre height (2.25)
+// Y range the base lip must stay clear of (flap + slits, or the V1 notch)
+btn_zone_y0 = flex_buttons ? btn_cy - flap_w / 2 - slit_w : btn_y0 - btn_cut_margin;
+btn_zone_y1 = flex_buttons ? btn_cy + flap_w / 2 + slit_w : btn_y1 + btn_cut_margin;
 rst_slot_bot = rst_z0 - 0.45;
 BIG = 100;
 
@@ -127,17 +175,77 @@ module usb_cut(z0, z1) {
     translate([0, 2, 0]) rotate([90, 0, 0]) linear_extrude(2 - out_y0 + 1)
         rrect(usb_cx - usb_cut_w / 2, z0, usb_cx + usb_cut_w / 2, z1, 1.2);
 }
-// side buttons: through both long walls, from z0 to z1
-module button_cuts(z0, z1) {
+// side buttons (V1 style): notches through both long walls, from z0 to z1
+module button_cuts(z0, z1, y0 = btn_y0 - btn_cut_margin, y1 = btn_y1 + btn_cut_margin) {
     for (x = [out_x0 - 1, cav_x1 - 1])
         translate([x, 0, 0]) rotate([90, 0, 90]) linear_extrude(wall + 2)
-            rrect(btn_y0 - btn_cut_margin, z0, btn_y1 + btn_cut_margin, z1, 0.8);
+            rrect(y0, z0, y1, z1, 0.8);
 }
-// RESET: pin hole / slot in the left wall of the base
+// mirror a left-side feature to the right side
+module both_sides() { children(); translate([pcb_w, 0, 0]) mirror([1, 0, 0]) children(); }
+// V2 flap: slits on both sides, gap at the bottom, wall thinned to flap_t from the inside
+module flap_cut_left() {
+    y0 = btn_cy - flap_w / 2;  y1 = btn_cy + flap_w / 2;  h = ceil_z - split_z + 1;
+    for (y = [y0 - slit_w, y1]) translate([out_x0 - 1, y, split_z - 1]) cube([wall + 2, slit_w, h]);
+    translate([out_x0 - 1, y0 - slit_w, split_z - 1]) cube([wall + 2, flap_w + 2 * slit_w, flap_gap + 1]);
+    translate([out_x0 + flap_t, y0 - slit_w, split_z - 1]) cube([wall - flap_t + 1, flap_w + 2 * slit_w, h]);
+}
+// V2 inner nub: reaches from the flap to just short of the plunger; +Z face sloped 45 deg for face-down printing
+module nub_left() {
+    tip = btn_plunger_recess - nub_gap;  root = out_x0 + 0.3;
+    translate([0, btn_cy + nub_w / 2, 0]) rotate([90, 0, 0]) linear_extrude(nub_w)
+        polygon([[root, btn_cz - 0.65], [tip, btn_cz - 0.65], [tip, btn_cz + 0.45], [root, btn_cz + 0.45 + (tip - root)]]);
+}
+// V3 top paddle (BOOT side): U-slits through the lid top, paddle thinned from the inside
+module top_flap_cut_left() {
+    y0 = btn_cy - top_flap_w / 2;  y1 = btn_cy + top_flap_w / 2;
+    x0 = cav_x0;                                   // outer slit starts at the cavity edge
+    translate([x0, y0 - top_slit_w, ceil_z - 1]) cube([top_slit_w, top_flap_w + 2 * top_slit_w, top_t + 3]);   // outer slit
+    for (y = [y0 - top_slit_w, y1])
+        translate([x0, y, ceil_z - 1]) cube([top_hinge_x - x0, top_slit_w, top_t + 3]);                         // side slits
+    translate([x0, y0 - top_slit_w, ceil_z - 1]) cube([top_hinge_x - x0, top_flap_w + 2 * top_slit_w, 1 + top_t - top_flap_t]); // thinning
+}
+module top_stem_left() {
+    cx = btn_inset + btn_body_w / 2;
+    translate([cx - stem_w / 2, btn_cy - stem_w / 2, plunger_top_z + stem_gap])
+        cube([stem_w, stem_w, lid_z1 - top_flap_t - (plunger_top_z + stem_gap) + 0.01]);
+}
+module top_cap_left() {
+    cx = btn_inset + btn_body_w / 2;
+    translate([cx, btn_cy, lid_z1 - 0.01]) cylinder(d = top_cap_d, h = top_cap_h + 0.01);
+}
+// V4 keycap bridge: square holes in the lid top ...
+key_cx_l = btn_inset + btn_body_w / 2;          // BOOT switch centre X (2.375); KEY is mirrored
+module key_hole_left() {
+    translate([key_cx_l - key_hole_w / 2, btn_cy - key_hole_w / 2, ceil_z - 1]) linear_extrude(top_t + 2)
+        rrect(0, 0, key_hole_w, key_hole_w, 0.6);
+}
+// ... and the loose part itself, in board coordinates (at rest: flange touching the lid underside)
+module key_half_left() {
+    fx0 = key_cx_l - key_hole_w / 2 - key_flange_out;  fx1 = key_cx_l + key_hole_w / 2 + key_flange_in;
+    fy0 = btn_cy - key_hole_w / 2 - key_flange_y;      fy1 = btn_cy + key_hole_w / 2 + key_flange_y;
+    translate([fx0, fy0, ceil_z - key_flange_t]) cube([fx1 - fx0, fy1 - fy0, key_flange_t]);             // flange
+    translate([key_cx_l - key_cap_w / 2, btn_cy - key_cap_w / 2, ceil_z - 0.01]) linear_extrude(top_t + key_cap_above + 0.01)
+        rrect(0, 0, key_cap_w, key_cap_w, 0.5);                                                            // cap
+    translate([key_cx_l - key_stem_w / 2, btn_cy - key_stem_w / 2, plunger_top_z + stem_gap])
+        cube([key_stem_w, key_stem_w, ceil_z - key_flange_t - plunger_top_z - stem_gap + 0.01]);           // stem
+}
+module keys() {
+    both_sides() key_half_left();
+    translate([key_cx_l, btn_cy - key_bar_w / 2, ceil_z - key_flange_t]) cube([pcb_w - 2 * key_cx_l, key_bar_w, key_flange_t]); // bar
+}
+// V2 outer cap on the flap, same 45 deg rule
+module cap_left() {
+    translate([0, btn_cy + cap_w / 2, 0]) rotate([90, 0, 0]) linear_extrude(cap_w)
+        polygon([[out_x0 + 0.01, btn_cz - 1.2], [out_x0 - cap_h, btn_cz - 1.2], [out_x0 - cap_h, btn_cz + 1.2 - cap_h], [out_x0 + 0.01, btn_cz + 1.2]]);
+}
+// RESET: keyhole in the left wall of the base - round pin hole at the plunger, slit up to the rim
 module reset_cut() {
-    top = reset_slot_open ? BIG : -0.2;
-    translate([out_x0 - 1, 0, 0]) rotate([90, 0, 90]) linear_extrude(wall + 2)
-        rrect(rst_cy - reset_slot_w / 2, rst_slot_bot, rst_cy + reset_slot_w / 2, top, 0.8);
+    rst_cz = (rst_z0 + rst_z1) / 2;
+    translate([out_x0 - 1, 0, 0]) rotate([90, 0, 90]) linear_extrude(wall + 2) {
+        translate([rst_cy, rst_cz]) circle(d = reset_hole_d);
+        if (reset_slot_open) translate([rst_cy - reset_slot_w / 2, rst_cz]) square([reset_slot_w, BIG]);
+    }
 }
 // JST-SH: opening in the USB end wall, merged with the USB notch above it
 module jst_cut() {
@@ -186,7 +294,7 @@ module base() {
         }
         translate([0, 0, floor_z]) linear_extrude(BIG) cavity_2d();   // cavity
         usb_cut(usb_cut_bot, BIG);                                      // USB notch (lower part)
-        button_cuts(split_z - 0.01, BIG);                               // keep the lip clear of the plungers
+        button_cuts(split_z - 0.01, BIG, btn_zone_y0, btn_zone_y1);     // keep the lip clear of the plungers / flaps
         reset_cut();
         if (jst_cutout) jst_cut();
     }
@@ -203,9 +311,14 @@ module lid() {
         translate([0, 0, split_z - 0.02]) linear_extrude(ceil_z - split_z + 0.02) cavity_2d();      // cavity
         window_cut();
         usb_cut(-BIG / 2, usb_cut_top);
-        button_cuts(-BIG / 2, btn_cut_top);
+        if (button_style == "keycap") both_sides() key_hole_left();
+        else if (button_style == "top") both_sides() top_flap_cut_left();
+        else if (button_style == "side") both_sides() flap_cut_left();
+        else button_cuts(-BIG / 2, btn_cut_top);
         snap_recesses();
     }
+    if (button_style == "top") both_sides() { top_stem_left(); top_cap_left(); }
+    if (button_style == "side") both_sides() { nub_left(); cap_left(); }
 }
 
 // ---------------------------------------------------------------- board mock-up (preview only)
@@ -227,11 +340,10 @@ module board() {
     color("silver") translate([usb_cx - usb_w / 2, -usb_out, pcb_t]) cube([usb_w, usb_len, usb_h]);
     // side buttons (body + plunger)
     color("gray") for (x0 = [btn_inset, pcb_w - btn_inset - btn_body_w])
-        translate([x0, btn_y0, pcb_t]) cube([btn_body_w, btn_y1 - btn_y0, btn_h]);
-    color("white") {
-        translate([btn_plunger_recess, btn_y0 + 0.8, pcb_t + 0.6]) cube([btn_inset - btn_plunger_recess + 0.01, 2.4, 1.3]);
-        translate([pcb_w - btn_inset - 0.01, btn_y0 + 0.8, pcb_t + 0.6]) cube([btn_inset - btn_plunger_recess + 0.01, 2.4, 1.3]);
-    }
+        translate([x0, btn_y0, pcb_t]) cube([btn_body_w, btn_y1 - btn_y0, btn_h - 0.4]);
+    // round plungers on TOP of the switches (body 2.1 high, plunger to plunger_top_z)
+    color("white") for (cx = [btn_inset + btn_body_w / 2, pcb_w - btn_inset - btn_body_w / 2])
+        translate([cx, btn_cy, pcb_t + btn_h - 0.4]) cylinder(d = 1.8, h = plunger_top_z - (pcb_t + btn_h - 0.4));
     // RESET (underside, left edge)
     color("gray")  translate([0.65, rst_y0 - 1.0, rst_body_z0]) cube([rst_body_x1 - 0.65, rst_y1 - rst_y0 + 2.0, -rst_body_z0]);
     color("white") translate([-rst_out, rst_y0, rst_z0]) cube([0.65 + rst_out + 0.01, rst_y1 - rst_y0, rst_z1 - rst_z0]);
@@ -249,11 +361,16 @@ module board() {
 // ---------------------------------------------------------------- print orientations
 module base_print() translate([0, 0, -base_z0]) base();
 module lid_print()  translate([0, out_y0 + out_y1, lid_z1]) rotate([180, 0, 0]) lid();   // top face on the bed
+module keys_print() translate([0, 2 * btn_cy, lid_z1 + key_cap_above]) rotate([180, 0, 0]) keys();   // cap faces on the bed
 
 // ---------------------------------------------------------------- dispatch
 if (part == "base")           base_print();
 else if (part == "lid")       lid_print();
-else if (part == "both_for_print") { base_print(); translate([out_x1 - out_x0 + 6, 0, 0]) lid_print(); }
+else if (part == "keys")      keys_print();
+else if (part == "both_for_print") {
+    base_print(); translate([out_x1 - out_x0 + 6, 0, 0]) lid_print();
+    if (button_style == "keycap") translate([0, out_y1 - out_y0 + 4, 0]) keys_print();
+}
 else if (part == "board")     board();
-else if (part == "assembly")  { color("tan") base(); color("tan", 0.6) lid(); board(); }
-else if (part == "exploded")  { color("tan") base(); translate([0, 0, 14]) color("tan", 0.6) lid(); translate([0, 0, 6]) board(); }
+else if (part == "assembly")  { color("tan") base(); color("tan", 0.6) lid(); if (button_style == "keycap") color("orangered") keys(); board(); }
+else if (part == "exploded")  { color("tan") base(); translate([0, 0, 14]) color("tan", 0.6) lid(); if (button_style == "keycap") translate([0, 0, 10]) color("orangered") keys(); translate([0, 0, 6]) board(); }
