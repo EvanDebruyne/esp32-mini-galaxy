@@ -178,8 +178,19 @@ def build_glow(side):
     band = np.exp(-np.abs(uy) / (5.0 + 0.07 * np.abs(ux))) * np.exp(-np.abs(ux) / 150.0)
     ring = np.exp(-np.abs(r - HOLE_RADIUS * 1.22) / 10.0)
     haze = np.exp(-(r - HOLE_RADIUS) / 60.0)
-    g = np.where(r > HOLE_RADIUS, 0.55 * band + 0.40 * ring + 0.25 * haze, 0.0)
+    # the far side of the disk, lensed over the top of the hole (and a thinner image under it)
+    R = HOLE_RADIUS
+    el = uy / np.maximum(r, 1e-6)                                   # 1 at the top, -1 at the bottom
+    halo_up = smoothstep_np(0.15, 0.75, el) * smoothstep_np(1.00 * R, 1.08 * R, r) * np.exp(-np.maximum(r - 1.08 * R, 0) / (0.22 * R))
+    halo_dn = smoothstep_np(0.15, 0.75, -el) * smoothstep_np(1.00 * R, 1.06 * R, r) * np.exp(-np.maximum(r - 1.06 * R, 0) / (0.09 * R))
+    doppler = 1.0 - 0.30 * ux / np.maximum(r, 1e-6)                 # the side coming toward you is brighter
+    g = np.where(r > HOLE_RADIUS, 0.55 * band + 0.25 * ring + 0.25 * haze + (0.80 * halo_up + 0.35 * halo_dn) * doppler, 0.0)
     return np.clip(g, 0, 1)
+
+
+def smoothstep_np(a, b, x):
+    t = np.clip((x - a) / (b - a), 0.0, 1.0)
+    return t * t * (3.0 - 2.0 * t)
 
 
 # ------------------------------------------------------------------ emitters

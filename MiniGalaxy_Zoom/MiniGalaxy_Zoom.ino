@@ -535,7 +535,13 @@ static void buildGlow(float sideSign) {
         float band = expf(-fabsf(uy) / (5.0f + 0.07f * fabsf(ux))) * expf(-fabsf(ux) / 150.0f);
         float ring = expf(-fabsf(r - HOLE_RADIUS * 1.22f) / 10.0f);
         float haze = expf(-(r - HOLE_RADIUS) / 60.0f);
-        g = 0.55f * band + 0.40f * ring + 0.25f * haze;
+        // the far side of the disk, lensed over the top of the hole (and a thinner image under it)
+        const float R = HOLE_RADIUS;
+        float el = uy / r;                                  // 1 at the top, -1 at the bottom
+        float haloUp = smoothstepf(0.15f, 0.75f, el)  * smoothstepf(1.00f * R, 1.08f * R, r) * expf(-fmaxf(r - 1.08f * R, 0.0f) / (0.22f * R));
+        float haloDn = smoothstepf(0.15f, 0.75f, -el) * smoothstepf(1.00f * R, 1.06f * R, r) * expf(-fmaxf(r - 1.06f * R, 0.0f) / (0.09f * R));
+        float doppler = 1.0f - 0.30f * ux / r;              // the side coming toward you is brighter
+        g = 0.55f * band + 0.25f * ring + 0.25f * haze + (0.80f * haloUp + 0.35f * haloDn) * doppler;
       }
       glowMap[y * W + x] = (uint8_t)(clampf(g, 0, 1) * 255.0f);
     }
