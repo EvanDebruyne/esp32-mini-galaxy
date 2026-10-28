@@ -18,6 +18,8 @@ network, no libraries beyond the ESP32 core.
 
 <p align="center"><img src="docs/zoom.gif" width="384" alt="The zoom-out from Earth to the Milky Way"></p>
 
+<p align="center"><img src="docs/zoom-merge.gif" width="560" alt="The black hole during the zoom, with the whole solar system on screen"></p>
+
 ## Sketches
 
 | Sketch | |

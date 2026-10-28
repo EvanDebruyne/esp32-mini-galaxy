@@ -5,6 +5,7 @@
   docs/merge.gif        both boards: Earths reach for each other, tear apart, become the black hole, then let go
   docs/earth.gif        one board: the pixel Earth doing a full turn (seamless loop)
   docs/debug.gif        the same, with the BOOT-button debug overlay on
+  docs/zoom-merge.gif   both boards: the merge while the whole solar system is on screen
   docs/zoom.gif         one board: the whole 7.5-minute zoom-out cycle in about 30 s
   docs/zoom-stages.png  twelve moments of the zoom, one strip
   docs/hero.png         the merge mid-way, as a still
@@ -144,6 +145,38 @@ def zoom_frames(seconds=30, fps=15):
     return frames
 
 
+def zoom_merge_frames(phase=0.455, fps=15, slow=1.25):
+    """The merge at one moment of the zoom (default: the whole solar system on screen), both boards.
+    Same reach / merge / hold / let-go timeline as merge_frames, stretched by `slow`."""
+    dots, stars, galaxy, near = zm.build_scene()
+    em = zm.Emitter(dots, galaxy, near)
+    glowL, glowR = zm.build_glow(1.0), zm.build_glow(-1.0)
+    FORM = 4.0 * slow
+    timeline = [
+        (0.0, 0.0), (1.5 * slow, 0.0), (3.0 * slow, zm.MERGE_START),
+        (3.0 * slow + FORM, 1.0), (3.0 * slow + FORM + 2.5 * slow, 1.0),
+        (3.0 * slow + FORM + 4.5 * slow, 0.0), (3.0 * slow + FORM + 6.0 * slow, 0.0),
+    ]
+    total = timeline[-1][0]
+    frames = []
+    n = int(total * fps)
+    for i in range(n):
+        t = i / fps
+        k = 0
+        while k < len(timeline) - 2 and t >= timeline[k + 1][0]:
+            k += 1
+        (t0, p0), (t1, p1) = timeline[k], timeline[k + 1]
+        P = p0 + (p1 - p0) * clampf((t - t0) / (t1 - t0), 0, 1)
+        L, Rb = zm.FB(), zm.FB()
+        tShared = phase * zm.ZOOM_MINUTES * 60.0 + t
+        zm.render(L, em, stars, glowL, P, 1.0, t, tShared, phase)
+        z = zm.render(Rb, em, stars, glowR, P, -1.0, t, tShared, phase)
+        for fb in (L, Rb):
+            zm.draw_scale_bar(fb, z["ppm"], z["env"] * (1.0 - clampf(P / zm.MERGE_START, 0.0, 1.0)))
+        frames.append(compose_pair(L, Rb, int(zm.GAP_PX), 2))
+    return frames
+
+
 def zoom_stages():
     dots, stars, galaxy, near = zm.build_scene()
     em = zm.Emitter(dots, galaxy, near)
@@ -161,4 +194,5 @@ if __name__ == "__main__":
     save_gif(merge_frames(15, debug=True), "debug.gif", 15)
     save_gif(earth_frames(), "earth.gif", 12)
     save_gif(zoom_frames(), "zoom.gif", 15)
+    save_gif(zoom_merge_frames(), "zoom-merge.gif", 15)
     zoom_stages()
