@@ -1,0 +1,36 @@
+Mini Galaxy
+Copyright (c) 2026 Ethan Denbrok
+
+This work is licensed under the Creative Commons Attribution-NonCommercial 4.0
+International License (CC BY-NC 4.0).
+
+In short, you are free to:
+
+  Share  - copy and redistribute the material in any medium or format
+  Adapt  - remix, transform, and build upon the material
+
+Under these terms:
+
+  Attribution    - You must give appropriate credit, provide a link to the
+                   license, and indicate if changes were made.
+  NonCommercial  - You may not use the material for commercial purposes.
+                   That includes selling the firmware, selling boards or kits
+                   flashed with it, or bundling it with a product for sale.
+
+No additional restrictions. You may not apply legal terms or technological
+measures that legally restrict others from doing anything the license permits.
+
+Personal use, sharing it with friends, flashing it to your own boards, modifying
+it and publishing your changes under the same terms are all welcome. For
+commercial use, get in touch.
+
+Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
+
+---
+
+Third-party material:
+
+- The Earth map (earth_map.h) is generated from Natural Earth data
+  (https://www.naturalearthdata.com), which is in the public domain.
+- The display pin-out and init sequence in tqt_display.h follow LilyGO's
+  T-QT examples (https://github.com/Xinyuan-LilyGO/T-QT), MIT licensed.

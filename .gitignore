@@ -1,0 +1,21 @@
+# Arduino build output
+build/
+*.bin
+*.elf
+*.map
+!case/*.3mf
+
+# Python
+__pycache__/
+*.pyc
+
+# OS and editor leftovers
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.vscode/
+.idea/
+
+# someone else's screenshot, kept locally only
+reference/tiktok-*
